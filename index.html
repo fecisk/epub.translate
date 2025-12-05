@@ -237,7 +237,9 @@
             const [progress, setProgress] = useState('');
             const [downloadUrl, setDownloadUrl] = useState(null);
             const [error, setError] = useState('');
-            const [hfToken, setHfToken] = useState(localStorage.getItem('hf_api_token') || '');
+            // Get token from URL parameter: ?token=hf_xxxxx
+            const urlParams = new URLSearchParams(window.location.search);
+            const [hfToken, setHfToken] = useState(urlParams.get('token') || '');
 
             const languages = [
                 { code: 'sk', name: 'Slovak' },
@@ -479,6 +481,22 @@
                                 onChange={(e) => {
                                     setHfToken(e.target.value);
                                     localStorage.setItem('hf_api_token', e.target.value);
+                                }}
+                                placeholder="Get free token from huggingface.co/settings/tokens"
+                                style={{width: '100%', padding: '0.5rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem'}}
+                            />
+                            <p style={{fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem'}}>
+                                💡 <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style={{color: '#6366f1'}}>Get a free token here</a> (takes 1 minute)
+                            </p>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="label">Hugging Face API Token</label>
+                            <input
+                                type="password"
+                                value={hfToken}
+                                onChange={(e) => {
+                                    setHfToken(e.target.value);
                                 }}
                                 placeholder="Get free token from huggingface.co/settings/tokens"
                                 style={{width: '100%', padding: '0.5rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem'}}
