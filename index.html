@@ -237,7 +237,8 @@
             const [progress, setProgress] = useState('');
             const [downloadUrl, setDownloadUrl] = useState(null);
             const [error, setError] = useState('');
-            const [backendUrl] = useState('http://localhost:5000');
+            // UPDATE THIS: Replace with your Cloudflare Worker URL
+            const [backendUrl] = useState('https://epub-translate-worker.YOUR_ACCOUNT.workers.dev');
 
             const languages = [
                 { code: 'sk', name: 'Slovak' },
@@ -442,7 +443,7 @@
                         <div className="form-group">
                             <label className="label">Backend Status</label>
                             <p style={{fontSize: '0.875rem', color: '#059669'}}>
-                                ✅ Running locally - completely offline and private
+                                ✅ Connected to Cloudflare Workers (serverless, free)
                             </p>
                         </div>
 
@@ -530,12 +531,12 @@
                                 <li>Original formatting is preserved</li>
                                 <li>Download your translated EPUB</li>
                             </ul>
-                            <h3 style={{marginTop: '1rem'}}>✅ 100% Offline & Private</h3>
+                            <h3 style={{marginTop: '1rem'}}>✅ 100% Private & Free</h3>
                             <ul>
-                                <li>Translation runs completely offline on your machine</li>
-                                <li>Your EPUB never leaves your browser or computer</li>
-                                <li>No external APIs or tokens needed</li>
-                                <li>Powered by local Ollama LLM</li>
+                                <li>Translation runs on Cloudflare Workers (zero-cost)</li>
+                                <li>Your EPUB never leaves your browser</li>
+                                <li>Powered by open-source Mistral-7B model</li>
+                                <li>No tracking, no data storage</li>
                             </ul>
                         </div>
                     </div>
