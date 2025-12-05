@@ -237,8 +237,7 @@
             const [progress, setProgress] = useState('');
             const [downloadUrl, setDownloadUrl] = useState(null);
             const [error, setError] = useState('');
-            const [apiKey, setApiKey] = useState(localStorage.getItem('libretranslate_api_key') || '');
-            const [apiUrl, setApiUrl] = useState(localStorage.getItem('libretranslate_url') || 'https://libretranslate.railway.app');
+            const [proxyUrl, setProxyUrl] = useState(localStorage.getItem('hf_proxy_url') || 'https://epub-translate-proxy.up.railway.app');
 
             const languages = [
                 { code: 'sk', name: 'Slovak' },
@@ -275,8 +274,8 @@
                     return;
                 }
 
-                if (!apiKey && !apiUrl) {
-                    setError('Please enter LibreTranslate API URL or API key');
+                if (!proxyUrl) {
+                    setError('Please enter translation proxy URL');
                     return;
                 }
 
@@ -409,33 +408,26 @@
 
             const translateText = async (text, targetLang) => {
                 try {
-                    const payload = {
-                        q: text,
-                        source: 'auto',
-                        target: targetLang
-                    };
-
-                    if (apiKey) {
-                        payload.api_key = apiKey;
-                    }
-
-                    const response = await fetch(`${apiUrl}/translate`, {
+                    const response = await fetch(`${proxyUrl}/translate`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({
+                            text: text,
+                            targetLang: targetLang
+                        })
                     });
 
                     if (!response.ok) {
                         const errorData = await response.json();
-                        throw new Error(`LibreTranslate error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                        throw new Error(`Translation error: ${response.status} - ${errorData.error || 'Unknown error'}`);
                     }
 
                     const data = await response.json();
                     return data.translatedText.trim();
                 } catch (err) {
-                    console.error('LibreTranslate error:', err);
+                    console.error('Translation error:', err);
                     throw err;
                 }
             };
@@ -458,31 +450,18 @@
                         </div>
 
                         <div className="form-group">
-                            <label className="label">LibreTranslate API URL</label>
+                            <label className="label">Translation Proxy URL (Optional)</label>
                             <input
                                 type="text"
-                                value={apiUrl}
+                                value={proxyUrl}
                                 onChange={(e) => {
-                                    setApiUrl(e.target.value);
-                                    localStorage.setItem('libretranslate_url', e.target.value);
+                                    setProxyUrl(e.target.value);
+                                    localStorage.setItem('hf_proxy_url', e.target.value);
                                 }}
-                                placeholder="e.g., https://libretranslate.de or http://localhost:5000"
-                                style={{width: '100%', padding: '0.5rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem'}}
+                                placeholder="Default: epub-translate-proxy.up.railway.app"
+                                style={{width: '100%', padding: '0.5rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem', color: '#6b7280'}}
                             />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="label">LibreTranslate API Key (Optional)</label>
-                            <input
-                                type="password"
-                                value={apiKey}
-                                onChange={(e) => {
-                                    setApiKey(e.target.value);
-                                    localStorage.setItem('libretranslate_api_key', e.target.value);
-                                }}
-                                placeholder="Leave empty for public API"
-                                style={{width: '100%', padding: '0.5rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '1rem'}}
-                            />
+                            <p style={{fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem'}}>Free translation via Hugging Face — no API key needed</p>
                         </div>
 
                         <div className="form-group">
@@ -565,15 +544,15 @@
                             <ul>
                                 <li>Upload your EPUB file</li>
                                 <li>Select target language</li>
-                                <li>All XHTML content will be translated</li>
+                                <li>All XHTML content will be translated (free)</li>
                                 <li>Original formatting is preserved</li>
                                 <li>Download your translated EPUB</li>
                             </ul>
-                            <h3 style={{marginTop: '1rem'}}>Setup Instructions:</h3>
+                            <h3 style={{marginTop: '1rem'}}>✅ Powered by Hugging Face (Free!)</h3>
                             <ul>
-                                <li>The API URL defaults to Railway.app hosted LibreTranslate</li>
-                                <li>You can change it to your own instance or other public APIs</li>
-                                <li>Your settings are saved locally in your browser</li>
+                                <li>Uses free Helsinki-NLP translation models</li>
+                                <li>No API key needed on your end</li>
+                                <li>Settings saved locally in your browser</li>
                             </ul>
                         </div>
                     </div>
