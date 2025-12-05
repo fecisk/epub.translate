@@ -237,9 +237,7 @@
             const [progress, setProgress] = useState('');
             const [downloadUrl, setDownloadUrl] = useState(null);
             const [error, setError] = useState('');
-            // Get token from URL parameter: ?token=hf_xxxxx
-            const urlParams = new URLSearchParams(window.location.search);
-            const [hfToken, setHfToken] = useState(urlParams.get('token') || '');
+            const [backendUrl] = useState('http://localhost:5000');
 
             const languages = [
                 { code: 'sk', name: 'Slovak' },
@@ -273,11 +271,6 @@
             const translateEPUB = async () => {
                 if (!file) {
                     setError('Please select an EPUB file first');
-                    return;
-                }
-
-                if (!hfToken) {
-                    setError('Please enter your Hugging Face API token');
                     return;
                 }
 
@@ -410,46 +403,19 @@
 
             const translateText = async (text, targetLang) => {
                 try {
-                    // Language model mapping (Helsinki-NLP opus-mt models)
-                    const modelMap = {
-                        'sk': 'Helsinki-NLP/opus-mt-en-sk',
-                        'cs': 'Helsinki-NLP/opus-mt-en-cs',
-                        'en': null,
-                        'es': 'Helsinki-NLP/opus-mt-en-es',
-                        'fr': 'Helsinki-NLP/opus-mt-en-fr',
-                        'de': 'Helsinki-NLP/opus-mt-en-de',
-                        'it': 'Helsinki-NLP/opus-mt-en-it',
-                        'pt': 'Helsinki-NLP/opus-mt-en-pt',
-                        'ru': 'Helsinki-NLP/opus-mt-en-ru',
-                        'ja': 'Helsinki-NLP/opus-mt-en-ja',
-                        'zh': 'Helsinki-NLP/opus-mt-en-zh',
-                        'ko': 'Helsinki-NLP/opus-mt-en-ko',
-                        'ar': 'Helsinki-NLP/opus-mt-en-ar',
-                    };
-
-                    // If English or not supported, return as-is
-                    if (targetLang === 'en' || !modelMap[targetLang]) {
-                        return text;
-                    }
-
-                    const model = modelMap[targetLang];
-
-                    const response = await fetch(
-                        `https://api-inference.huggingface.co/models/${model}`,
-                        {
-                            headers: { Authorization: `Bearer ${hfToken}` },
-                            method: 'POST',
-                            body: JSON.stringify({ inputs: text }),
-                        }
-                    );
-
-                    const result = await response.json();
+                    const response = await fetch(`${backendUrl}/translate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text, targetLang })
+                    });
 
                     if (!response.ok) {
-                        throw new Error(result.error || `Translation failed: ${response.status}`);
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Translation failed: ${response.status}`);
                     }
 
-                    return result[0]?.translation_text || text;
+                    const data = await response.json();
+                    return data.translatedText.trim();
                 } catch (err) {
                     console.error('Translation error:', err);
                     throw err;
@@ -474,35 +440,9 @@
                         </div>
 
                         <div className="form-group">
-                            <label className="label">Hugging Face API Token</label>
-                            <input
-                                type="password"
-                                value={hfToken}
-                                onChange={(e) => {
-                                    setHfToken(e.target.value);
-                                    localStorage.setItem('hf_api_token', e.target.value);
-                                }}
-                                placeholder="Get free token from huggingface.co/settings/tokens"
-                                style={{width: '100%', padding: '0.5rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem'}}
-                            />
-                            <p style={{fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem'}}>
-                                💡 <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style={{color: '#6366f1'}}>Get a free token here</a> (takes 1 minute)
-                            </p>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="label">Hugging Face API Token</label>
-                            <input
-                                type="password"
-                                value={hfToken}
-                                onChange={(e) => {
-                                    setHfToken(e.target.value);
-                                }}
-                                placeholder="Get free token from huggingface.co/settings/tokens"
-                                style={{width: '100%', padding: '0.5rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.875rem'}}
-                            />
-                            <p style={{fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem'}}>
-                                💡 <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style={{color: '#6366f1'}}>Get a free token here</a> (takes 1 minute)
+                            <label className="label">Backend Status</label>
+                            <p style={{fontSize: '0.875rem', color: '#059669'}}>
+                                ✅ Running locally - completely offline and private
                             </p>
                         </div>
 
@@ -584,18 +524,18 @@
                         <div className="info-box">
                             <h3>How it works:</h3>
                             <ul>
-                                <li>Enter your free Hugging Face token</li>
                                 <li>Upload your EPUB file</li>
                                 <li>Select target language</li>
                                 <li>All XHTML content will be translated</li>
                                 <li>Original formatting is preserved</li>
                                 <li>Download your translated EPUB</li>
                             </ul>
-                            <h3 style={{marginTop: '1rem'}}>✅ 100% Free & Private</h3>
+                            <h3 style={{marginTop: '1rem'}}>✅ 100% Offline & Private</h3>
                             <ul>
-                                <li>Uses free Hugging Face models</li>
-                                <li>Your EPUB never leaves your browser</li>
-                                <li>Token stored only in your browser</li>
+                                <li>Translation runs completely offline on your machine</li>
+                                <li>Your EPUB never leaves your browser or computer</li>
+                                <li>No external APIs or tokens needed</li>
+                                <li>Powered by local Ollama LLM</li>
                             </ul>
                         </div>
                     </div>
