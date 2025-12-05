@@ -238,7 +238,7 @@
             const [downloadUrl, setDownloadUrl] = useState(null);
             const [error, setError] = useState('');
             const [apiKey, setApiKey] = useState(localStorage.getItem('libretranslate_api_key') || '');
-            const [apiUrl, setApiUrl] = useState(localStorage.getItem('libretranslate_url') || 'https://libretranslate.de');
+            const [apiUrl, setApiUrl] = useState(localStorage.getItem('libretranslate_url') || 'https://libretranslate.railway.app');
 
             const languages = [
                 { code: 'sk', name: 'Slovak' },
@@ -568,6 +568,12 @@
                                 <li>All XHTML content will be translated</li>
                                 <li>Original formatting is preserved</li>
                                 <li>Download your translated EPUB</li>
+                            </ul>
+                            <h3 style={{marginTop: '1rem'}}>Setup Instructions:</h3>
+                            <ul>
+                                <li>The API URL defaults to Railway.app hosted LibreTranslate</li>
+                                <li>You can change it to your own instance or other public APIs</li>
+                                <li>Your settings are saved locally in your browser</li>
                             </ul>
                         </div>
                     </div>
